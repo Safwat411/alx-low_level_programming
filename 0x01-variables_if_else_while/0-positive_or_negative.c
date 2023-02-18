@@ -1,13 +1,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-
 /**
- * main - Determines if the output number is +ve, -ve or zero.
- *
- * Return: Always 0 (Success)
+ * main - Determines if the output number is +ve, -ve or 0
+ * Return: Always 0 (success)
  */
-
 int main(void)
 {
 	int n;
@@ -17,12 +14,10 @@ int main(void)
 	if (n > 0)
 	{
 		printf("%d is positive\n", n);
-	}
-	else if (n == 0)
+	} else if (n == 0)
 	{
 		printf("%d is zero\n", n);
-	}
-	else
+	} else if (n < 0)
 	{
 		printf("%d is negative\n", n);
 	}
