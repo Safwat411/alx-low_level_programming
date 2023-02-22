@@ -6,7 +6,6 @@
  * followed by a new line.
  * @n: print starting from this number
  */
- 
 void print_to_98(int n)
 {
 	int i;
@@ -33,5 +32,4 @@ void print_to_98(int n)
 
 		}
 	}
-						
 }
