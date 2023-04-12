@@ -1,9 +1,10 @@
 #include "main.h"
 #include <stdio.h>
 
-/*
+/**
  * binary_to_uint - function that converts a binary number to an unsigned int
  * @b: a pointer to a string of zeros and ones
+ *
  * Return: the number has been converted or 0
  */
 
