@@ -1,78 +1,94 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <elf.h>
 
 /**
- * error - Prints an error message to stderr and exits with status code 98.
- * @msg: The error message to print.
- */
-void error(char *msg)
+* check_magic_number - Checks if the file is an ELF by comparing magic numbers
+* @e_ident: An array containing the ELF header values
+* Return: True if the magic numbers match, False otherwise
+*/
+bool check_magic_number(unsigned char *e_ident)
 {
-fprintf(stderr, "%s\n", msg);
-exit(98);
+if (e_ident[EI_MAG0] != ELFMAG0 || e_ident[EI_MAG1] != ELFMAG1 ||
+e_ident[EI_MAG2] != ELFMAG2 || e_ident[EI_MAG3] != ELFMAG3)
+{
+return (false);
+}
+return (true);
 }
 
 /**
- * print_header - Prints the ELF header information to stdout.
- * @header: A pointer to the ELF header.
- */
-void print_header(void *header)
+* print_type - Determines and prints the type of ELF file
+* @e_type: An integer representing the type of ELF file
+* Return: None
+*/
+void print_type(uint16_t e_type)
 {
-int i;
-Elf32_Ehdr *h32 = (Elf32_Ehdr *)header;
-
-printf("ELF Header:\n");
-printf("  Magic:   ");
-for (i = 0; i < EI_NIDENT; i++)
-printf("%02x ", h32->e_ident[i]);
-printf("\n");
-printf("  Class:           %s\n", h32->e_ident[EI_CLASS] == ELFCLASS64
-? "ELF64" : "ELF32");
-printf("  Data:            %s\n", h32->e_ident[EI_DATA] == ELFDATA2LSB
-? "2's complement, little endian" : "2's complement, big endian");
-printf("  Version:         %d (current)\n", h32->e_ident[EI_VERSION]);
-printf("  OS/ABI:          %s\n", h32->e_ident[EI_OSABI] == ELFOSABI_SYSV
-? "UNIX - System V" : "UNIX - unknown");
-printf("  ABI Version:     %d\n", h32->e_ident[EI_ABIVERSION]);
-printf("  Type:            %s\n", h32->e_type == ET_EXEC
-? "EXEC (Executable file)" : h32->e_type == ET_DYN
-? "DYN (Shared object file)" : "UNKNOWN");
-printf("  Entry point address:   %x\n", h32->e_entry);
-printf("\n");
+const char *type_str;
+switch (e_type)
+{
+case ET_NONE:
+type_str = "NONE (No file type)";
+break;
+case ET_REL:
+type_str = "REL (Relocatable file)";
+break;
+case ET_EXEC:
+type_str = "EXEC (Executable file)";
+break;
+case ET_DYN:
+type_str = "DYN (Shared object file)";
+break;
+case ET_CORE:
+type_str = "CORE (Core file)";
+break;
+default:
+type_str = "UNKNOWN";
+break;
+}
+printf("  Type:                              %s\n", type_str);
 }
 
 /**
- * main - Main function that reads the ELF header from the specified file and
- * prints the information contained in it to stdout.
- * @argc: The number of command-line arguments.
- * @argv: An array containing the command-line arguments.
- * Return: 0 on success, 98 on error.
- */
+* main - Entry point to the ELF header parsing program
+* @argc: An integer representing the number of arguments passed to the program
+* @argv: A pointer to an array of characters representing the arguments passed
+* Return: 0 if the program runs successfully, 1 otherwise
+*/
 int main(int argc, char **argv)
 {
-int fd;
-void *header;
-ssize_t header_size;
-
-if (argc != 2)
-error("Usage: elf_header elf_filename");
-
-fd = open(argv[1], O_RDONLY);
-if (fd < 0)
-error("Error opening file");
-
-header_size = sizeof(Elf32_Ehdr);
-header = malloc(header_size);
-
-if (read(fd, (void *)header, header_size) != header_size)
-error("Error reading file");
-
-print_header(header);
-
-free(header);
-close(fd);
+FILE *file;
+unsigned char e_ident[EI_NIDENT];
+uint16_t e_type;
+if (argc < 2)
+{
+printf("Usage: %s <ELF file>\n", argv[0]);
+return (1);
+}
+file = fopen(argv[1], "rb");
+if (!file)
+{
+printf("Failed to open file: %s\n", argv[1]);
+return (1);
+}
+if (fread(e_ident, 1, EI_NIDENT, file) != EI_NIDENT)
+{
+printf("Failed to read ELF header from file: %s\n", argv[1]);
+fclose(file);
+return (1);
+}
+if (!check_magic_number(e_ident))
+{
+printf("File is not an ELF file\n");
+fclose(file);
+return (1);
+}
+e_type = *(uint16_t *)&e_ident[EI_DATA];
+print_type(e_type);
+fclose(file);
 return (0);
 }
 
