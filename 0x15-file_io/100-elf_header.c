@@ -112,9 +112,9 @@ void printElfData(unsigned char *e_ident)
 }
 
 /**
- *  * printElfVersion - Prints the version of an ELF header.
- *   * @e_ident: A pointer to an array containing the ELF version.
- *    */
+ * printElfVersion - Prints the version of an ELF header.
+ * @e_ident: A pointer to an array containing the ELF version.
+ */
 void printElfVersion(unsigned char *e_ident)
 {
 	 printf(" Version: %d",
@@ -305,8 +305,8 @@ int main(int __attribute__((__unused__)) argc, char *argv[])
 	printElfVersion(header->e_ident);
 	printElfOsAbi(header->e_ident);
 	printElfAbi(header->e_ident);
-	printElfType(header->type, header->e_ident);
-	printElfEntry(header->entry, header->e_ident);
+	printElfType(header->e_type, header->e_ident);
+	printElfEntry(header->e_entry, header->e_ident);
 
 	free(header);
 	closeElfFile(o);
